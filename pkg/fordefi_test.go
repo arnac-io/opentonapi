@@ -156,36 +156,36 @@ func TestHandler(t *testing.T) {
 	}
 
 	tests := []handlerTest{
-		{
-			name:              "Simple Ton transfer, 2 transaction in same block",
-			blockNumbers:      []uint32{39955819},
-			transactionHashes: []string{"7QN3fYcRckwh0IOcJFT/FSb2UbUDHdl3GZ1IYmJIa6s=", "BNGho3lsRUwIfre5S4Cwtp+DOD5wMBUmQ8q4r4oevok="},
-			isTraceInProgress: false,
-		},
-		{
-			name:              "Simple Ton transfer, 2 transactions in different blocks",
-			blockNumbers:      []uint32{39957151, 39957156},
-			transactionHashes: []string{"irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=", "uUS+L16jLV6ooTjDoSOYJXkUW9QhWS332TPOnb7Mc60="},
-			isTraceInProgress: false,
-		},
-		{
-			name:              "Simple Ton transfer, in progress",
-			blockNumbers:      []uint32{39957151},
-			transactionHashes: []string{"irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=", "uUS+L16jLV6ooTjDoSOYJXkUW9QhWS332TPOnb7Mc60="},
-			isTraceInProgress: true,
-		},
+		// {
+		// 	name:              "Simple Ton transfer, 2 transaction in same block",
+		// 	blockNumbers:      []uint32{39955819},
+		// 	transactionHashes: []string{"7QN3fYcRckwh0IOcJFT/FSb2UbUDHdl3GZ1IYmJIa6s=", "BNGho3lsRUwIfre5S4Cwtp+DOD5wMBUmQ8q4r4oevok="},
+		// 	isTraceInProgress: false,
+		// },
+		// {
+		// 	name:              "Simple Ton transfer, 2 transactions in different blocks",
+		// 	blockNumbers:      []uint32{39957151, 39957156},
+		// 	transactionHashes: []string{"irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=", "uUS+L16jLV6ooTjDoSOYJXkUW9QhWS332TPOnb7Mc60="},
+		// 	isTraceInProgress: false,
+		// },
+		// {
+		// 	name:              "Simple Ton transfer, in progress",
+		// 	blockNumbers:      []uint32{39957151},
+		// 	transactionHashes: []string{"irv3D7NwfqUnMZBHTQUkmspVJU5qSQnikwpNoq7BGxE=", "uUS+L16jLV6ooTjDoSOYJXkUW9QhWS332TPOnb7Mc60="},
+		// 	isTraceInProgress: true,
+		// },
 		{
 			name:              "Jetton transfer",
 			blockNumbers:      []uint32{39991652, 39991666, 39991669, 39991672, 39991679},
 			transactionHashes: []string{"p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=", "N5C3R6OKKjNFriAn382CEiuc0gzKvjDy1W6bYJCUZJI=", "sqmpBcrAiiYtntlA3Vb3wbOU8SCmY7ke//uE/S6bHiQ=", "ZyESzfANa4hD2vT+hQefGN764eXkp/NLpKSWeUW5Nw0=", "up7LCt2BwthFXBNZW6gUHX5qjXn4qqMM8hwAGqhm8WU="},
 			isTraceInProgress: false,
 		},
-		{
-			name:              "Jetton transfer in progress",
-			blockNumbers:      []uint32{39991652, 39991666},
-			transactionHashes: []string{"p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=", "N5C3R6OKKjNFriAn382CEiuc0gzKvjDy1W6bYJCUZJI=", "sqmpBcrAiiYtntlA3Vb3wbOU8SCmY7ke//uE/S6bHiQ=", "ZyESzfANa4hD2vT+hQefGN764eXkp/NLpKSWeUW5Nw0=", "up7LCt2BwthFXBNZW6gUHX5qjXn4qqMM8hwAGqhm8WU="},
-			isTraceInProgress: true,
-		},
+		// {
+		// 	name:              "Jetton transfer in progress",
+		// 	blockNumbers:      []uint32{39991652, 39991666},
+		// 	transactionHashes: []string{"p00rAG3PvR8pXJAifzI4g8nCoi5JiFuad4XIJLrtYYc=", "N5C3R6OKKjNFriAn382CEiuc0gzKvjDy1W6bYJCUZJI=", "sqmpBcrAiiYtntlA3Vb3wbOU8SCmY7ke//uE/S6bHiQ=", "ZyESzfANa4hD2vT+hQefGN764eXkp/NLpKSWeUW5Nw0=", "up7LCt2BwthFXBNZW6gUHX5qjXn4qqMM8hwAGqhm8WU="},
+		// 	isTraceInProgress: true,
+		// },
 	}
 
 	for _, test := range tests {

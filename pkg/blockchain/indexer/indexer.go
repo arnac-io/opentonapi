@@ -234,6 +234,7 @@ func (idx *Indexer) initChunk(seqno uint32) (*chunk, error) {
 		}
 		ch.ids[id] = struct{}{}
 
+		// time.Sleep(1 * time.Second)
 		blockTransactions, err := idx.tonapiClient.GetBlockchainBlockTransactions(context.Background(), tonapi.GetBlockchainBlockTransactionsParams{id.BlockID.String()})
 		if err != nil {
 			return nil, err

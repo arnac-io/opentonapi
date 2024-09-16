@@ -458,6 +458,24 @@ func (s *LiteStorage) GetTransaction(ctx context.Context, hash tongo.Bits256) (*
 	if err != nil {
 		return nil, core.ErrEntityNotFound
 	}
+
+	if tx.InMsg != nil {
+		rawBody := hex.EncodeToString(tx.InMsg.Body)
+		decodeMessageBody, err := decodeMessageBody(rawBody, tx.InMsg.MsgType)
+		if err != nil {
+			return nil, err
+		}
+		tx.InMsg.DecodedBody = decodeMessageBody
+	}
+	for i := range tx.OutMsgs {
+		rawBody := hex.EncodeToString(tx.OutMsgs[i].Body)
+		decodeMessageBody, err := decodeMessageBody(rawBody, tx.OutMsgs[i].MsgType)
+		if err != nil {
+			return nil, err
+		}
+		tx.OutMsgs[i].DecodedBody = decodeMessageBody
+	}
+
 	return &tx, nil
 }
 
@@ -502,6 +520,23 @@ func (s *LiteStorage) searchTxInCache(a tongo.AccountID, lt uint64) *core.Transa
 	tx, err := s.transactionsIndexByHash.Get(context.Background(), hash)
 	if err != nil {
 		return nil
+	}
+
+	if tx.InMsg != nil {
+		rawBody := hex.EncodeToString(tx.InMsg.Body)
+		decodeMessageBody, err := decodeMessageBody(rawBody, tx.InMsg.MsgType)
+		if err != nil {
+			return nil
+		}
+		tx.InMsg.DecodedBody = decodeMessageBody
+	}
+	for i := range tx.OutMsgs {
+		rawBody := hex.EncodeToString(tx.OutMsgs[i].Body)
+		decodeMessageBody, err := decodeMessageBody(rawBody, tx.OutMsgs[i].MsgType)
+		if err != nil {
+			return nil
+		}
+		tx.OutMsgs[i].DecodedBody = decodeMessageBody
 	}
 	return &tx
 }
@@ -779,46 +814,12 @@ func oasMessageToCoreMessage(oasMessage tonapi.Message) (core.Message, error) {
 		coreMessage.MsgType = core.IntMsg
 	}
 
-	var cell *boc.Cell
-	if oasMessage.RawBody.Set && oasMessage.RawBody.Value != "" {
-		cells, err := boc.DeserializeBocHex(oasMessage.RawBody.Value)
+	if oasMessage.RawBody.Set {
+		decodedMessageBody, err := decodeMessageBody(oasMessage.RawBody.Value, coreMessage.MsgType)
 		if err != nil {
 			return core.Message{}, err
 		}
-		if len(cells) != 1 {
-			return core.Message{}, errors.New("multiple cells not supported")
-		}
-		cell = cells[0]
-	}
-
-	if cell != nil {
-		switch coreMessage.MsgType {
-		case "IntMsg":
-			// 	var decodedBody *DecodedMessageBody
-			_, op, value, err := abi.InternalMessageDecoder(cell, nil)
-			if err == nil && op != nil {
-				coreMessage.DecodedBody = &core.DecodedMessageBody{
-					Operation: *op,
-					Value:     value,
-				}
-			}
-		case "ExtInMsg":
-			_, op, value, err := abi.ExtInMessageDecoder(cell, nil)
-			if err == nil && op != nil {
-				coreMessage.DecodedBody = &core.DecodedMessageBody{
-					Operation: *op,
-					Value:     value,
-				}
-			}
-		case "ExtOutMsg":
-			_, op, value, err := abi.ExtOutMessageDecoder(cell, nil, tlb.MsgAddress{})
-			if err == nil && op != nil {
-				coreMessage.DecodedBody = &core.DecodedMessageBody{
-					Operation: *op,
-					Value:     value,
-				}
-			}
-		}
+		coreMessage.DecodedBody = decodedMessageBody
 	}
 
 	if oasMessage.Init.Set {
@@ -862,4 +863,37 @@ func oasAccountToCoreAccount(oasAccount tonapi.BlockchainRawAccount) (core.Accou
 		}
 	}
 	return coreAccount, nil
+}
+
+func decodeMessageBody(rawBody string, msgType core.MsgType) (*core.DecodedMessageBody, error) {
+	if rawBody == "" {
+		return nil, nil
+	}
+
+	cells, err := boc.DeserializeBocHex(rawBody)
+	if err != nil {
+		return nil, err
+	}
+	if len(cells) != 1 {
+		return nil, errors.New("multiple cells not supported")
+	}
+	cell := cells[0]
+
+	var op *string
+	var value any
+	switch msgType {
+	case "IntMsg":
+		_, op, value, err = abi.InternalMessageDecoder(cell, nil)
+	case "ExtInMsg":
+		_, op, value, err = abi.ExtInMessageDecoder(cell, nil)
+	case "ExtOutMsg":
+		_, op, value, err = abi.ExtOutMessageDecoder(cell, nil, tlb.MsgAddress{})
+	}
+	if err != nil {
+		return nil, err
+	}
+	if op != nil {
+		return &core.DecodedMessageBody{Operation: *op, Value: value}, nil
+	}
+	return nil, nil
 }
