@@ -249,7 +249,7 @@ func (s *LiteStorage) ParseBlock(ctx context.Context, block indexer.IDandBlock) 
 			hash := tongo.Bits256(transaction.Hash)
 			if err != nil {
 				s.logger.Error("failed to process tx",
-					zap.String("tx-hash", hash.Hex()),
+					zap.String("tx-hash", tx.Hash),
 					zap.Error(err))
 				continue
 			}
@@ -686,10 +686,10 @@ func OasTransactionToCoreTransaction(oasTransaction tonapi.Transaction) (core.Tr
 		NewHash: newHash,
 	}
 
-	coreTransaction.Raw, err = hex.DecodeString(oasTransaction.Raw)
-	if err != nil {
-		return core.Transaction{}, err
-	}
+	// coreTransaction.Raw, err = hex.DecodeString(oasTransaction.Raw)
+	// if err != nil {
+	// 	return core.Transaction{}, err
+	// }
 
 	if oasTransaction.InMsg.Set {
 		coreMessage, err := oasMessageToCoreMessage(oasTransaction.InMsg.Value)
@@ -787,8 +787,8 @@ func oasMessageToCoreMessage(oasMessage tonapi.Message) (core.Message, error) {
 	}
 
 	coreMessage := core.Message{
-		MessageID:   messageId,
-		Hash:        tongo.MustParseHash(oasMessage.Hash),
+		MessageID: messageId,
+		// Hash:        tongo.MustParseHash(oasMessage.Hash),
 		IhrDisabled: oasMessage.IhrDisabled,
 		Bounce:      oasMessage.Bounce,
 		Bounced:     oasMessage.Bounced,
@@ -817,9 +817,9 @@ func oasMessageToCoreMessage(oasMessage tonapi.Message) (core.Message, error) {
 
 	if oasMessage.Init.Set {
 		coreMessage.Init, _ = hex.DecodeString(oasMessage.Init.Value.Boc)
-		for _, iface := range oasMessage.Init.Value.Interfaces {
-			coreMessage.InitInterfaces = append(coreMessage.InitInterfaces, abi.ContractInterfaceFromString(iface))
-		}
+		// for _, iface := range oasMessage.Init.Value.Interfaces {
+		// 	coreMessage.InitInterfaces = append(coreMessage.InitInterfaces, abi.ContractInterfaceFromString(iface))
+		// }
 	}
 
 	if oasMessage.RawBody.Set {
@@ -865,7 +865,7 @@ func decodeMessageBody(rawBody string, msgType core.MsgType) (*core.DecodedMessa
 
 	cells, err := boc.DeserializeBocHex(rawBody)
 	if err != nil {
-		return nil, err
+		return nil, nil
 	}
 	if len(cells) != 1 {
 		return nil, errors.New("multiple cells not supported")
