@@ -24,7 +24,7 @@ type chunk struct {
 	blocks   []IDandBlock
 }
 
-// Indexer tracks the blockchain and notifies subscribers about new blocks.
+// Indexer tracks the blockchain and notifies subscribers about new blocks
 type Indexer struct {
 	logger       *zap.Logger
 	cli          *liteapi.Client
@@ -83,8 +83,8 @@ func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
 
 }
 
-func (idx *Indexer) GetBlocksFromMasterBlock(masterBlockNumber uint32) (IDandBlock, []IDandBlock, error) {
-	chunk, err := idx.initChunk(masterBlockNumber)
+func (idx *Indexer) GetBlocksFromMasterBlock(ctx context.Context, masterBlockNumber uint32) (IDandBlock, []IDandBlock, error) {
+	chunk, err := idx.initChunk(ctx, masterBlockNumber)
 	if err != nil {
 		idx.logger.Error("failed to get init chunk", zap.Error(err))
 		return IDandBlock{}, nil, err
@@ -186,13 +186,13 @@ func (idx *Indexer) next(prevChunk *chunk) (*chunk, error) {
 	return &currentChunk, nil
 }
 
-func (idx *Indexer) initChunk(seqno uint32) (*chunk, error) {
+func (idx *Indexer) initChunk(ctx context.Context, seqno uint32) (*chunk, error) {
 	init := tongo.BlockID{
 		Workchain: -1,
 		Shard:     9223372036854775808,
 		Seqno:     seqno,
 	}
-	blocks, err := idx.tonapiClient.GetBlockchainMasterchainBlocks(context.Background(), tonapi.GetBlockchainMasterchainBlocksParams{int32(seqno)})
+	blocks, err := idx.tonapiClient.GetBlockchainMasterchainBlocks(ctx, tonapi.GetBlockchainMasterchainBlocksParams{MasterchainSeqno: int32(seqno)})
 	if err != nil {
 		return nil, err
 	}
@@ -234,7 +234,7 @@ func (idx *Indexer) initChunk(seqno uint32) (*chunk, error) {
 		}
 		ch.ids[id] = struct{}{}
 
-		blockTransactions, err := idx.tonapiClient.GetBlockchainBlockTransactions(context.Background(), tonapi.GetBlockchainBlockTransactionsParams{id.BlockID.String()})
+		blockTransactions, err := idx.tonapiClient.GetBlockchainBlockTransactions(ctx, tonapi.GetBlockchainBlockTransactionsParams{BlockID: id.BlockID.String()})
 		if err != nil {
 			return nil, err
 		}
