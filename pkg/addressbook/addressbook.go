@@ -361,7 +361,6 @@ func NewAddressBook(logger *zap.Logger, addressPath, jettonPath, collectionPath 
 		addressers:      options.addressers,
 		walletsResolved: cache.NewLRUCache[tongo.AccountID, bool](1_000_000, "is_wallet"),
 	}
-
 	go refresher("gg whitelist", time.Hour, 5*time.Minute, logger, book.getGGWhitelist)
 	go refresher("addresses", time.Minute*15, 5*time.Minute, logger, func() error { return manual.refreshAddresses(addressPath) })
 	go refresher("jettons", time.Minute*15, 5*time.Minute, logger, func() error { return book.refreshJettons(jettonPath) })
@@ -375,7 +374,7 @@ func refresher(name string, interval, errorInterval time.Duration, logger *zap.L
 	for {
 		err := f()
 		if err != nil {
-			logger.Error("refresh "+name, zap.Error(err))
+			logger.Info("refresh "+name, zap.Error(err))
 			time.Sleep(errorInterval + time.Duration(rand.Intn(10))*time.Second)
 			continue
 		}
