@@ -116,11 +116,11 @@ func (s *LiteStorage) recursiveGetChildren(ctx context.Context, tx core.Transact
 		}
 		trace.Children = append(trace.Children, &child)
 	}
-	var err error
-	trace.AccountInterfaces, err = s.getAccountInterfaces(ctx, tx.Account)
+	accountInterfaces, err := s.getAccountInterfaces(ctx, tx.Account)
 	if err != nil {
-		return core.Trace{}, nil
+		s.logger.Warn(fmt.Sprintf("Failed to get account interfaces for %v, continuing with empty interfaces: %v", tx.Account, err))
 	}
+	trace.AccountInterfaces = accountInterfaces
 	trace.OutMsgs = externalMessages
 	return trace, nil
 }
