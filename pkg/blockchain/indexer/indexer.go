@@ -86,7 +86,6 @@ func (idx *Indexer) Run(ctx context.Context, channels []chan IDandBlock) {
 func (idx *Indexer) GetBlocksFromMasterBlock(masterBlockNumber uint32) (IDandBlock, []IDandBlock, error) {
 	chunk, err := idx.initChunk(masterBlockNumber)
 	if err != nil {
-		idx.logger.Error("failed to get init chunk", zap.Error(err))
 		return IDandBlock{}, nil, err
 	}
 	workChainBlocks := []IDandBlock{}
